@@ -21,6 +21,8 @@ module.exports = (callback) ->
   autoReconnect = true
   autoMark = true
 
+  console.log token
+
   slack = new Slack(token, autoReconnect, autoMark)
 
   slack.on 'open', ->
@@ -62,7 +64,7 @@ module.exports = (callback) ->
     # Respond to messages with the reverse of the text received.
     if type is 'message' and channel?
 
-      channel.send "Ok, I am working ..."
+      #channel.send "Ok, I am working ..."
 
       crawler.execute text, (err, result) ->
         if err
@@ -70,11 +72,12 @@ module.exports = (callback) ->
         else
           urls = ""
           for string in result
-            if string.charAt(0) is 'h'
+            if string.substring(0, 4) is "http"
               urls = urls + "\n" + string
-          response = "Added the following URLs to the super link system: \n" + urls
-          console.log response
-          channel.send response
+          if urls isnt ""
+            response = "Added the following URLs to the super link system: \n" + urls
+            console.log response
+            channel.send response
 
   slack.on 'error', (error) ->
     console.error "Error: #{error}"

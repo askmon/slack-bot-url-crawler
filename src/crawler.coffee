@@ -6,7 +6,7 @@ module.exports = (async, config, childProcess) ->
   regex = new RegExp(expression)
 
   validate = (text, callback) ->
-    if text.match(regex)
+    if text? and text.match(regex)
       urls = text.match(regex)
       console.log urls
       return callback(null,urls)
