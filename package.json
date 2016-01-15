@@ -1,13 +1,13 @@
 {
-  "name": "tqt-bot",
+  "name": "slack-url-bot",
   "version": "1.0.0",
-  "description": "Taqtile tqt project bot",
+  "description": "Slack bot that reads URLs made for Taqtile hackathon",
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
     "start": "nf start"
   },
-  "author": "Felipe Sabino <felipe@taqtile.com>",
+  "author": "André Kanayama <andre.kanayama@taqtile.com>",
   "license": "ISC",
   "dependencies": {
     "coffee-script": "1.9.3",
