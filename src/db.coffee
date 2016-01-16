@@ -4,8 +4,9 @@ module.exports = (mongo, config) ->
 
   addFilter = (url, callback) ->
     filterCol = mongodb.collection('filters')
+    console.log "Will add " + url + " to filters"
     filterCol.update { }, { $addToSet: filters: url }, { multi: true }, ->
-      callback()
+      callback(null, true)
 
   getFilter = (test, callback) ->
     filterCol = mongodb.collection('filters')

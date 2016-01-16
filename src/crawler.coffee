@@ -1,7 +1,6 @@
 module.exports = (mongojs, config) ->
 
   URI = require 'urijs'
-  mongodb =
 
   expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi
   regex = new RegExp(expression)
