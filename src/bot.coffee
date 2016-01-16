@@ -83,7 +83,13 @@ module.exports = (callback) ->
             if option == 0
               return callback null, 'hlep'
             else if option == 1
-              return callback null, 'remove'
+              crawler.execute arg, (err, result) ->
+                if err
+                  console.log err.toString()
+                else
+                  removeCmd result
+                  console.log 'removecalled'
+                  return callback null, result
             else if option == 2
               return callback null, 'filter'
             else
@@ -93,12 +99,21 @@ module.exports = (callback) ->
       parseCmd = (text, callback) ->
         return callback null, text.split(' ').slice(1).toString()
 
+      removeCmd = (text) ->
+        if text
+          console.log 'text is not false'
+          channel.send text
+        else
+          channel.send 'No URLs detected'
+
       if text.indexOf(userBotUser) > -1
         callCommand text, (err, result) ->
           if err
-            channel.send err
+            # console.log err
+            # channel.send err.toString()
           else
-            channel.send result
+            # console.log result
+            # channel.send result
 
       crawler.execute text, (err, result) ->
         if err

@@ -11,7 +11,7 @@ module.exports = (async, config, childProcess) ->
       console.log urls
       return callback(null,urls)
     else
-      return callback(null,"Not an URL :(")
+      return callback(null,false)
 
   executeCommand = (text, callback) ->
     validate(text,callback)
