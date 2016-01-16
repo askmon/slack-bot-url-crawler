@@ -122,7 +122,7 @@ module.exports = (callback) ->
               link = link[0]
             console.log link
           else
-            return callback null, "I won't know what to remove if you don't tell me"
+            return callback null, "I won't know what to remove if you don't tell me\nhttp://imgur.com/download/fWxYWhV/"
           if link?
             removeFromSwiftype link, (err) ->
               if not err?
@@ -141,7 +141,7 @@ module.exports = (callback) ->
               link = urii.host()
             console.log link
           else
-            return callback null, "I won't know what to filter if you don't tell me"
+            return callback null, "I won't know what to filter if you don't tell me\nhttp://imgur.com/download/fWxYWhV/"
           if link?
             db.add link, (err) ->
               if not err?
@@ -212,6 +212,7 @@ module.exports = (callback) ->
                         tagsS = tagsS.split("/")[0]
                       if not tagsS?
                         tagsS = ""
+                      tagsS = tagsS + " " + channelName
                       console.log "going to send this to swiftype: " + url
                       console.log titleS
                       console.log descriptionS
