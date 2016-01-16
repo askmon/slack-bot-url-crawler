@@ -20,6 +20,43 @@ crawler = module_crawler async, config, childProcess
 module_db = require './db'
 db = module_db mongojs, config
 
+removeFromSwiftype = (url, channel, callback) ->
+  console.log encodeURIComponent(url)
+  swiftypeKey = config.swiftypeKey
+  urldel = "https://api.swiftype.com/api/v1/engines/knowledgebase/document_types/links/documents/" + encodeURIComponent(url) + "?auth_token=" + swiftypeKey
+  request.del urldel, (error, response, body) ->
+    console.log error
+  # swiftype = new swiftypeapi(apiKey: swiftypeKey)
+  # swiftype.documents.create {
+  #   engine: 'knowledgebase'
+  #   documentType: 'links'
+  #   document:
+  #     external_id: url
+  #   fields: [
+  #     {
+  #       name: 'title'
+  #       value: 'titleS'
+  #       type: 'string'
+  #     }
+  #     {
+  #       name: 'description'
+  #       value: 'descriptionS'
+  #       type: 'string'
+  #     }
+  #     {
+  #       name: 'keywords'
+  #       value: 'tagsS'
+  #       type: 'string'
+  #     }
+  #     {
+  #       name: 'url'
+  #       value: 'url'
+  #       type: 'string'
+  #     }
+  #   ]
+  # }, (err, res) ->
+
+
 module.exports = (callback) ->
 
   config.validate()
@@ -48,6 +85,7 @@ module.exports = (callback) ->
     console.log 'You are in: ' + channels.join(', ')
     console.log 'As well as: ' + groups.join(', ')
     console.log db
+    removeFromSwiftype "http://globo.com", "lalala", (res) ->
     # db.add "drive.google.com",(err, filters) ->
     #   console.log err
     #   console.log filters
@@ -91,6 +129,8 @@ module.exports = (callback) ->
           if urls isnt ""
             for url in urlsArray
               request url, (error, response, body) ->
+                if error?
+                  console.log error
                 if !error and response.statusCode == 200
                   title = body.match(/<title.*>\n?(.*?)<\/title>/)
                   console.log JSON.stringify title
