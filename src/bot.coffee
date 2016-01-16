@@ -79,7 +79,7 @@ module.exports = (callback) ->
         async.waterfall [
           async.apply(parseCmd, text)
           (arg, callback) ->
-            option = allowedArgs.indexOf(arg)
+            option = allowedArgs.indexOf(arg.split(',')[0].toString())
             if option == 0
               return callback null, 'hlep'
             else if option == 1
@@ -88,7 +88,6 @@ module.exports = (callback) ->
                   console.log err.toString()
                 else
                   removeCmd result
-                  console.log 'removecalled'
                   return callback null, result
             else if option == 2
               return callback null, 'filter'
@@ -101,7 +100,6 @@ module.exports = (callback) ->
 
       removeCmd = (text) ->
         if text
-          console.log 'text is not false'
           channel.send text
         else
           channel.send 'No URLs detected'
