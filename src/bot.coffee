@@ -1,4 +1,7 @@
 Slack   = require('slack-client')
+htmltojson = require('html-to-json')
+request = require('request')
+swiftypeapi = require('swiftype')
 
 # Config helpers
 configHelper = require('tq1-helpers').config_helper
@@ -18,6 +21,7 @@ module.exports = (callback) ->
   config.validate()
 
   token = config.slackToken
+  swiftypeKey = config.swiftypeKey
   autoReconnect = true
   autoMark = true
 
@@ -71,11 +75,69 @@ module.exports = (callback) ->
           channel.send "Error executing crawler command `$ #{text}`: ```#{err}```"
         else
           urls = ""
+          urlsArray = []
           for string in result
             if string.substring(0, 4) is "http"
               urls = urls + "\n" + string
+              urlsArray.push string
           if urls isnt ""
-            response = "Added the following URLs to the super link system: \n" + urls
+            for url in urlsArray
+              request url, (error, response, body) ->
+                if !error and response.statusCode == 200
+                  title = body.match(/<title.*>\n?(.*?)<\/title>/)
+                  console.log JSON.stringify title
+                  if title? and title[1]?
+                    titleS = title[1]
+                  else
+                    titleS = "untitled"
+                  description = body.match('<meta name=\"description\" content=\"(.*)\"')
+                  if description? and description[1]?
+                    descriptionS = description[1]
+                    descriptionS = descriptionS.split("\"")[0]
+                  else
+                    descriptionS = ""
+                  tags = body.match('<meta name=\"keywords\" content=\"(.*)\"')
+                  if tags? and tags[1]?
+                    tagsS = tags[1].replace(/,/g," ")
+                    tagsS = tagsS.split("\"")[0]
+                    tagsS = tagsS.split("/")[0]
+                  if not tagsS?
+                    tagsS = ""
+                  console.log "going to send this to swiftype: " + url
+                  console.log titleS
+                  console.log descriptionS
+                  console.log tagsS
+                  swiftype = new swiftypeapi(apiKey: swiftypeKey)
+                  swiftype.documents.create {
+                    engine: 'knowledgebase'
+                    documentType: 'links'
+                    document:
+                      external_id: url
+                      fields: [
+                        {
+                          name: 'title'
+                          value: titleS
+                          type: 'string'
+                        }
+                        {
+                          name: 'description'
+                          value: descriptionS
+                          type: 'string'
+                        }
+                        {
+                          name: 'keywords'
+                          value: tagsS
+                          type: 'string'
+                        }
+                        {
+                          name: 'url'
+                          value: url
+                          type: 'string'
+                        }
+                      ]
+                  }, (err, res) ->
+                    console.log res
+            response = "Will add the following URLs to the super link system: \n" + urls
             console.log response
             channel.send response
 
