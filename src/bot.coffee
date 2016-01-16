@@ -2,6 +2,7 @@ Slack   = require('slack-client')
 htmltojson = require('html-to-json')
 request = require('request')
 swiftypeapi = require('swiftype')
+mongojs = require('mongojs')
 
 # Config helpers
 configHelper = require('tq1-helpers').config_helper
@@ -15,6 +16,9 @@ childProcess = require('child_process')
 module_crawler = require './crawler'
 crawler = module_crawler async, config, childProcess
 
+#db
+module_db = require './db'
+db = module_db mongojs, config
 
 module.exports = (callback) ->
 
@@ -43,6 +47,10 @@ module.exports = (callback) ->
     console.log "Welcome to Slack. You are @#{slack.self.name} of #{slack.team.name}"
     console.log 'You are in: ' + channels.join(', ')
     console.log 'As well as: ' + groups.join(', ')
+    console.log db
+    # db.add "drive.google.com",(err, filters) ->
+    #   console.log err
+    #   console.log filters
 
     # messages = if unreads is 1 then 'message' else 'messages'
     #
@@ -65,11 +73,11 @@ module.exports = (callback) ->
     #   Received: #{type} #{channelName} #{userName} #{ts} "#{text}"
     # """
 
-    # Respond to messages with the reverse of the text received.
     if type is 'message' and channel?
 
       #channel.send "Ok, I am working ..."
 
+      #OK, I know the code from now on is terrible, but it is relatively easy to make the modules if you have time
       crawler.execute text, (err, result) ->
         if err
           channel.send "Error executing crawler command `$ #{text}`: ```#{err}```"
