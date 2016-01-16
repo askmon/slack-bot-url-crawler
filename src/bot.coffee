@@ -3,6 +3,7 @@ htmltojson = require('html-to-json')
 request = require('request')
 swiftypeapi = require('swiftype')
 mongojs = require('mongojs')
+URI = require('urijs')
 
 # Config helpers
 configHelper = require('tq1-helpers').config_helper
@@ -130,11 +131,14 @@ module.exports = (callback) ->
                 return callback null, 'Could not remove ' + arg.split(',')
           else
             return callback null, 'This is not a valid URL, at least for me...: ' + arg.split(',')[1]
+        #filter
         else if option == 2
           if arg.split(',')[1]?
             link = validate(arg.split(',')[1])
             if link and link[0]
               link = link[0]
+              urii = new URI link
+              link = urii.host()
             console.log link
           else
             return callback null, "I won't know what to filter if you don't tell me"
@@ -150,7 +154,7 @@ module.exports = (callback) ->
           console.log arg
           return callback "Argument not allowed. BOT current only supports the following arguments: `#{allowedArgs.join('`, `')}`"
 
-      if text.indexOf(userBotUser) > -1
+      if text?.indexOf(userBotUser) > -1
         willadd = false
         callCommand text, (err, result) ->
           if err
@@ -167,72 +171,84 @@ module.exports = (callback) ->
           else
             urls = ""
             urlsArray = []
-            for string in result
-              if string.substring(0, 4) is "http"
-                urls = urls + "\n" + string
-                urlsArray.push string
-            if urls isnt ""
-              for url in urlsArray
-                request url, (error, response, body) ->
-                  if error?
-                    console.log error
-                  if !error and response.statusCode == 200
-                    title = body.match(/<title.*>\n?(.*?)<\/title>/)
-                    console.log JSON.stringify title
-                    if title? and title[1]?
-                      titleS = title[1]
-                    else
-                      titleS = "untitled"
-                    description = body.match('<meta name=\"description\" content=\"(.*)\"')
-                    if description? and description[1]?
-                      descriptionS = description[1]
-                      descriptionS = descriptionS.split("\"")[0]
-                    else
-                      descriptionS = ""
-                    tags = body.match('<meta name=\"keywords\" content=\"(.*)\"')
-                    if tags? and tags[1]?
-                      tagsS = tags[1].replace(/,/g," ")
-                      tagsS = tagsS.split("\"")[0]
-                      tagsS = tagsS.split("/")[0]
-                    if not tagsS?
-                      tagsS = ""
-                    console.log "going to send this to swiftype: " + url
-                    console.log titleS
-                    console.log descriptionS
-                    console.log tagsS
-                    swiftype = new swiftypeapi(apiKey: swiftypeKey)
-                    swiftype.documents.create {
-                      engine: 'knowledgebase'
-                      documentType: 'links'
-                      document:
-                        external_id: url
-                        fields: [
-                          {
-                            name: 'title'
-                            value: titleS
-                            type: 'string'
-                          }
-                          {
-                            name: 'description'
-                            value: descriptionS
-                            type: 'string'
-                          }
-                          {
-                            name: 'keywords'
-                            value: tagsS
-                            type: 'string'
-                          }
-                          {
-                            name: 'url'
-                            value: url
-                            type: 'string'
-                          }
-                        ]
-                    }, (err, res) ->
-                      console.log res
-              response = "Will add the following URLs to the super link system: \n" + urls
-              console.log "response"
-              channel.send response
+            db.get "test", (err, filters) ->
+              console.log JSON.stringify filters.filters + "filt"
+              for string in result
+                if string.substring(0, 4) is "http"
+                  uriii = new URI string
+                  host = uriii.host()
+                  if filters?.filters?
+                    i = true
+                    for f in filters.filters
+                      if f is host
+                        i = false
+                      else
+                        console.log "filtered"
+                    if i
+                      urls = urls + "\n" + string
+                      urlsArray.push string
+              if urls isnt ""
+                for url in urlsArray
+                  request url, (error, response, body) ->
+                    if error?
+                      console.log error
+                    if !error and response.statusCode == 200
+                      title = body.match(/<title.*>\n?(.*?)<\/title>/)
+                      console.log JSON.stringify title
+                      if title? and title[1]?
+                        titleS = title[1]
+                      else
+                        titleS = "untitled"
+                      description = body.match('<meta name=\"description\" content=\"(.*)\"')
+                      if description? and description[1]?
+                        descriptionS = description[1]
+                        descriptionS = descriptionS.split("\"")[0]
+                      else
+                        descriptionS = ""
+                      tags = body.match('<meta name=\"keywords\" content=\"(.*)\"')
+                      if tags? and tags[1]?
+                        tagsS = tags[1].replace(/,/g," ")
+                        tagsS = tagsS.split("\"")[0]
+                        tagsS = tagsS.split("/")[0]
+                      if not tagsS?
+                        tagsS = ""
+                      console.log "going to send this to swiftype: " + url
+                      console.log titleS
+                      console.log descriptionS
+                      console.log tagsS
+                      swiftype = new swiftypeapi(apiKey: swiftypeKey)
+                      swiftype.documents.create {
+                        engine: 'knowledgebase'
+                        documentType: 'links'
+                        document:
+                          external_id: url
+                          fields: [
+                            {
+                              name: 'title'
+                              value: titleS
+                              type: 'string'
+                            }
+                            {
+                              name: 'description'
+                              value: descriptionS
+                              type: 'string'
+                            }
+                            {
+                              name: 'keywords'
+                              value: tagsS
+                              type: 'string'
+                            }
+                            {
+                              name: 'url'
+                              value: url
+                              type: 'string'
+                            }
+                          ]
+                      }, (err, res) ->
+                        console.log res
+                response = "Will add the following URLs to the super link system: \n" + urls
+                console.log "response"
+                channel.send response
 
   slack.on 'error', (error) ->
     console.error "Error: #{error}"
