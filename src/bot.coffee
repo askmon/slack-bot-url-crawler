@@ -54,6 +54,9 @@ module.exports = (callback) ->
     user = slack.getUserByID(message.user)
     response = ''
 
+    userBotUser = "<@" + message._client.self.id + ">"
+    allowedArgs = ['help', 'remove', 'filter']
+
     {type, ts, text} = message
 
     channelName = if channel?.is_channel then '#' else ''
@@ -69,6 +72,33 @@ module.exports = (callback) ->
     if type is 'message' and channel?
 
       #channel.send "Ok, I am working ..."
+      # console.log message
+      # if text.toString().src(userBotUser)
+      # console.log message
+      callCommand = (text, callback) ->
+        async.waterfall [
+          async.apply(parseCmd, text)
+          (arg, callback) ->
+            option = allowedArgs.indexOf(arg)
+            if option == 0
+              return callback null, 'hlep'
+            else if option == 1
+              return callback null, 'remove'
+            else if option == 2
+              return callback null, 'filter'
+            else
+              return callback "Argumment not allowed. BOT current only supports the following arguments: `#{allowedArgs.join('`, `')}`"
+        ], callback
+
+      parseCmd = (text, callback) ->
+        return callback null, text.split(' ').slice(1).toString()
+
+      if text.indexOf(userBotUser) > -1
+        callCommand text, (err, result) ->
+          if err
+            channel.send err
+          else
+            channel.send result
 
       crawler.execute text, (err, result) ->
         if err
