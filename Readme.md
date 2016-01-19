@@ -51,9 +51,13 @@ $ npm start
 }
 ```
 
-## Would be nice to do
+## Needs to be done
 
 - Search engine and document name are currently hard coded, they should be environment variables
+- Change engine name and document type to match your account
+
+## Would be nice to do
+
 - Refactor all the code
 - Add URL information to Mongo database, like who posted it and date
   - Having all the info on Mongo, the bot can check if the URL was already posted
