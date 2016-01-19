@@ -198,7 +198,7 @@ module.exports = (callback) ->
                       if title? and title[1]?
                         titleS = title[1]
                       else
-                        titleS = "untitled"
+                        titleS = url
                       description = body.match('<meta name=\"description\" content=\"(.*)\"')
                       if description? and description[1]?
                         descriptionS = description[1]
